@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{fragments/layout :: layout(title='Order Details', content=~{::content})}">
+<div th:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-receipt"></i> Order Details</h2>
+        <a th:href="@{/orders}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Orders
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <!-- Order Items -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-list"></i> Order Items</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Book</th>
+                                    <th>Price</th>
+                                    <th>Quantity</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="item : ${orderItems}">
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img th:src="${item.book.imageUrl}" th:alt="${item.book.title}" 
+                                                 class="img-thumbnail me-2" style="width: 50px; height: 75px; object-fit: cover;">
+                                            <div>
+                                                <strong th:text="${item.book.title}">Book Title</strong>
+                                                <br>
+                                                <small class="text-muted" th:text="|by ${item.book.author}|">Author</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td th:text="|$${item.book.price}|">$0.00</td>
+                                    <td th:text="${item.quantity}">1</td>
+                                    <td th:text="|$${item.book.price * item.quantity}|">$0.00</td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="3" class="text-end"><strong>Total:</strong></td>
+                                    <td><strong th:text="|$${order.totalAmount}|">$0.00</strong></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <!-- Order Information -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-info-circle"></i> Order Information</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Order ID:</strong> <span th:text="|#${order.id}|">#123</span></p>
+                    <p><strong>Order Date:</strong> <span th:text="${#temporals.format(order.createdAt, 'MMM dd, yyyy HH:mm')}">Date</span></p>
+                    <p><strong>Status:</strong> 
+                        <span class="badge" 
+                              th:classappend="${order.status == T(com.bookstore.enums.OrderStatus).PENDING} ? 'bg-warning' : 
+                                             ${order.status == T(com.bookstore.enums.OrderStatus).SHIPPED} ? 'bg-info' : 'bg-success'"
+                              th:text="${order.status}">PENDING</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Shipping Information -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-shipping-fast"></i> Shipping Information</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Address:</strong></p>
+                    <p th:text="${order.shippingAddress}" class="text-muted">Shipping address</p>
+                    <p><strong>Delivery Method:</strong> <span th:text="${order.deliveryMethod}">Standard</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <a th:href="@{/home}" class="btn btn-primary">
+            <i class="fas fa-home"></i> Continue Shopping
+        </a>
+        <a th:href="@{/orders}" class="btn btn-outline-secondary">
+            <i class="fas fa-list"></i> Back to Orders
+        </a>
+    </div>
+</div>
+</html> 

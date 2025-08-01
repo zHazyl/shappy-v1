@@ -1,10 +1,3 @@
--- Insert initial users (passwords are encoded using BCrypt)
--- admin password: admin123
--- customer password: cust123
-INSERT INTO users (username, password, email, role) VALUES
-('admin', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.', 'admin@bookstore.com', 'ADMIN'),
-('customer', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.', 'customer@bookstore.com', 'USER');
-
 -- Insert sample books
 INSERT INTO books (title, author, genre, price, description, image_url) VALUES
 ('The Great Gatsby', 'F. Scott Fitzgerald', 'Fiction', 12.99, 'A classic American novel set in the Jazz Age, exploring themes of wealth, love, and the American Dream.', '/images/books/great-gatsby.jpg'),
@@ -21,9 +14,4 @@ INSERT INTO books (title, author, genre, price, description, image_url) VALUES
 ('The Lord of the Rings: The Fellowship of the Ring', 'J.R.R. Tolkien', 'Fantasy', 18.99, 'The first volume of the epic fantasy trilogy.', '/images/books/lotr-fellowship.jpg'),
 ('Dune', 'Frank Herbert', 'Science Fiction', 17.99, 'A science fiction novel set in the distant future amidst a feudal interstellar society.', '/images/books/dune.jpg'),
 ('The Hunger Games', 'Suzanne Collins', 'Dystopian Fiction', 14.49, 'A dystopian novel about a televised fight to the death.', '/images/books/hunger-games.jpg'),
-('Gone Girl', 'Gillian Flynn', 'Thriller', 15.49, 'A psychological thriller about a woman''s disappearance.', '/images/books/gone-girl.jpg');
-
--- Create carts for existing users
-INSERT INTO carts (user_id) VALUES 
-((SELECT id FROM users WHERE username = 'customer')),
-((SELECT id FROM users WHERE username = 'admin')); 
+('Gone Girl', 'Gillian Flynn', 'Thriller', 15.49, 'A psychological thriller about a woman''s disappearance.', '/images/books/gone-girl.jpg'); 

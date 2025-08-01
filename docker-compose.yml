@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   postgres:
     image: postgres:13
@@ -9,7 +7,7 @@ services:
       POSTGRES_USER: bookstore_user
       POSTGRES_PASSWORD: bookstore_pass
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
@@ -21,7 +19,7 @@ services:
       retries: 3
 
   app:
-    build: .
+    image: book:1
     container_name: bookstore-app
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/bookstore

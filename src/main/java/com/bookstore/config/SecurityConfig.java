@@ -21,8 +21,9 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(authz -> authz
-                .requestMatchers("/", "/login", "/register", "/css/**", "/js/**", "/images/**", "/webjars/**", "/actuator/health").permitAll()
+                .requestMatchers("/", "/login", "/register", "/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/upload/**").hasRole("ADMIN")
                 .requestMatchers("/home", "/books/**", "/cart/**", "/checkout/**", "/orders/**").hasAnyRole("USER", "ADMIN")
                 .anyRequest().authenticated()
             )
@@ -39,7 +40,9 @@ public class SecurityConfig {
                 .deleteCookies("JSESSIONID")
                 .permitAll()
             )
-            .csrf(csrf -> csrf.disable())
+            .csrf(csrf -> csrf
+                .ignoringRequestMatchers("/api/upload/**")
+            )
             .headers(headers -> headers
                 .frameOptions().deny()
             );

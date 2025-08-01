@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{fragments/layout :: layout(title='Admin Dashboard', content=~{::content})}">
+<div th:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-tachometer-alt"></i> Admin Dashboard</h2>
+        <div>
+            <a th:href="@{/admin/books}" class="btn btn-primary">
+                <i class="fas fa-book"></i> Manage Books
+            </a>
+            <a th:href="@{/admin/orders}" class="btn btn-success">
+                <i class="fas fa-shopping-cart"></i> Manage Orders
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title" th:text="${totalBooks}">0</h4>
+                            <p class="card-text">Total Books</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-book fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title" th:text="${totalUsers}">0</h4>
+                            <p class="card-text">Total Users</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-users fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title" th:text="${totalOrders}">0</h4>
+                            <p class="card-text">Total Orders</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-shopping-bag fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title" th:text="|$${totalRevenue}|">$0.00</h4>
+                            <p class="card-text">Total Revenue</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-dollar-sign fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-book"></i> Quick Book Actions</h5>
+                </div>
+                <div class="card-body">
+                    <a th:href="@{/admin/books}" class="btn btn-primary btn-lg w-100 mb-2">
+                        <i class="fas fa-plus"></i> Add New Book
+                    </a>
+                    <a th:href="@{/admin/books}" class="btn btn-outline-primary w-100">
+                        <i class="fas fa-edit"></i> Edit Existing Books
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-shopping-cart"></i> Quick Order Actions</h5>
+                </div>
+                <div class="card-body">
+                    <a th:href="@{/admin/orders}" class="btn btn-success btn-lg w-100 mb-2">
+                        <i class="fas fa-eye"></i> View All Orders
+                    </a>
+                    <a th:href="@{/admin/orders}" class="btn btn-outline-success w-100">
+                        <i class="fas fa-truck"></i> Update Order Status
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</html> 

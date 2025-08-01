@@ -15,7 +15,7 @@ A comprehensive Spring Boot e-commerce platform for book sales with modern web t
 ### Technical Features
 - **Responsive Design**: Bootstrap-based UI that works on all devices
 - **Database Management**: PostgreSQL with Flyway migrations
-- **Image Handling**: File-based image storage for book covers
+- **Image Handling**: File-based image storage for book covers (see [IMAGES.md](IMAGES.md))
 - **Pagination**: Paginated lists for books, orders, and reviews
 - **Search & Filtering**: Advanced search with multiple criteria
 - **Security**: Password encryption, CSRF protection, and role-based authorization
@@ -172,8 +172,10 @@ Key configurations in `application.properties`:
 
 ### Database Migrations
 Database schema is managed through Flyway migrations in `src/main/resources/db/migration/`:
-- `V1__Create_initial_tables.sql` - Creates all database tables
-- `V2__Insert_initial_data.sql` - Inserts sample data and demo users
+- `V1__Create_initial_tables.sql` - Creates all database tables with proper constraints and indexes
+- `V2__Insert_initial_data.sql` - Inserts 15 sample books with details
+
+Demo users are created programmatically via `DataLoader.java` component to ensure proper password encryption.
 
 ### Adding New Features
 1. Create/update entities in `models/` package
@@ -206,9 +208,12 @@ docker-compose down
 ## Sample Data
 
 The application comes with pre-loaded sample data:
-- 15 popular books across various genres
-- 2 demo user accounts (admin and customer)
-- Empty carts for both users
+- **15 popular books** across various genres (loaded via Flyway migration)
+- **2 demo user accounts** created automatically on startup:
+  - **Admin**: username: `admin`, password: `admin123` (with ADMIN role)
+  - **Customer**: username: `customer`, password: `cust123` (with USER role)
+- **Empty carts** automatically created for both users
+- All passwords are properly encrypted using BCrypt
 
 ## Security Features
 

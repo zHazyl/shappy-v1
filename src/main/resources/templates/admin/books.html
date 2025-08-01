@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{fragments/layout :: layout(title='Manage Books', content=~{::content})}">
+<div th:fragment="content">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="text-gradient"><i class="fas fa-book"></i> Manage Books</h2>
+            <a th:href="@{/admin}" class="btn btn-outline-primary">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+
+        <!-- Add New Book Form -->
+        <div class="card shadow-soft mb-4 fade-in-up">
+            <div class="card-header bg-gradient text-white">
+                <h5 class="mb-0"><i class="fas fa-plus"></i> Add New Book</h5>
+            </div>
+            <div class="card-body">
+                <form th:action="@{/admin/books}" method="post" th:object="${newBook}" id="bookForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="title" class="form-label">Title</label>
+                                <input type="text" class="form-control" id="title" name="title" th:field="*{title}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="author" class="form-label">Author</label>
+                                <input type="text" class="form-control" id="author" name="author" th:field="*{author}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="genre" class="form-label">Genre</label>
+                                <input type="text" class="form-control" id="genre" name="genre" th:field="*{genre}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="price" class="form-label">Price ($)</label>
+                                <input type="number" step="0.01" class="form-control" id="price" name="price" th:field="*{price}" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <!-- Image Upload Section -->
+                            <div class="mb-3">
+                                <label class="form-label">Book Cover Image</label>
+                                <div class="image-upload-container">
+                                    <div class="image-upload-area" id="imageUploadArea">
+                                        <div class="upload-content">
+                                            <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                                            <div class="upload-text">Drop image here or click to browse</div>
+                                            <div class="upload-hint">JPG, PNG, WebP up to 5MB</div>
+                                        </div>
+                                        <input type="file" id="imageInput" accept="image/*" style="display: none;">
+                                    </div>
+                                    <div id="imagePreview" class="image-preview-container" style="display: none;">
+                                        <img id="previewImg" class="image-preview" src="" alt="Preview">
+                                        <div class="image-actions mt-2">
+                                            <button type="button" class="btn btn-sm btn-danger" id="removeImage">
+                                                <i class="fas fa-trash"></i> Remove
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <input type="hidden" id="imageUrl" name="imageUrl" th:field="*{imageUrl}">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="description" class="form-label">Description</label>
+                                <textarea class="form-control" id="description" name="description" th:field="*{description}" rows="4" required></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-plus"></i> Add Book
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Books List -->
+        <div class="card shadow-soft fade-in-up">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-list"></i> All Books</h5>
+                    <div class="badge bg-primary fs-6" th:text="|${books.totalElements} books|">0 books</div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th style="width: 80px;">Cover</th>
+                                <th>Title & Author</th>
+                                <th>Genre</th>
+                                <th>Price</th>
+                                <th style="width: 120px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="book : ${books.content}" class="align-middle">
+                                <td>
+                                    <div class="book-cover-cell">
+                                        <img th:src="${book.imageUrl}" th:alt="${book.title}" 
+                                             class="img-thumbnail rounded-lg" 
+                                             style="width: 60px; height: 90px; object-fit: cover;"
+                                             onerror="this.src='/images/placeholder-book.jpg'">
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="book-info">
+                                        <h6 class="mb-1 fw-bold" th:text="${book.title}">Book Title</h6>
+                                        <small class="text-muted" th:text="|by ${book.author}|">Author</small>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary rounded-pill" th:text="${book.genre}">Genre</span>
+                                </td>
+                                <td>
+                                    <span class="price-tag" th:text="|$${book.price}|">$0.00</span>
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <button class="btn btn-sm btn-outline-primary" 
+                                                th:onclick="|viewBook(${book.id})|" 
+                                                title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <form th:action="@{/admin/books/{id}/delete(id=${book.id})}" method="post" class="d-inline">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" 
+                                                    onclick="return confirm('Are you sure you want to delete this book? This action cannot be undone.')"
+                                                    title="Delete Book">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <nav th:if="${books.totalPages > 1}" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item" th:classappend="${!books.hasPrevious()} ? 'disabled'">
+                            <a class="page-link" th:href="@{/admin/books(page=${books.number - 1})}">
+                                <i class="fas fa-chevron-left"></i> Previous
+                            </a>
+                        </li>
+                        <li class="page-item" th:each="pageNum : ${#numbers.sequence(0, books.totalPages - 1)}" 
+                            th:classappend="${pageNum == books.number} ? 'active'">
+                            <a class="page-link" th:href="@{/admin/books(page=${pageNum})}" th:text="${pageNum + 1}">1</a>
+                        </li>
+                        <li class="page-item" th:classappend="${!books.hasNext()} ? 'disabled'">
+                            <a class="page-link" th:href="@{/admin/books(page=${books.number + 1})}">
+                                Next <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+
+                <!-- Empty State -->
+                <div th:if="${books.totalElements == 0}" class="text-center py-5">
+                    <i class="fas fa-book fa-4x text-muted mb-3"></i>
+                    <h4 class="text-muted">No books yet</h4>
+                    <p class="text-muted">Add your first book using the form above!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upload Progress Modal -->
+    <div class="modal fade" id="uploadModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-body text-center py-4">
+                    <div class="spinner mb-3"></div>
+                    <div>Uploading image...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Upload JavaScript -->
+    <script>
+        class ImageUploader {
+            constructor() {
+                this.imageInput = document.getElementById('imageInput');
+                this.uploadArea = document.getElementById('imageUploadArea');
+                this.previewContainer = document.getElementById('imagePreview');
+                this.previewImg = document.getElementById('previewImg');
+                this.imageUrlInput = document.getElementById('imageUrl');
+                this.removeBtn = document.getElementById('removeImage');
+                this.uploadModal = new bootstrap.Modal(document.getElementById('uploadModal'));
+                
+                this.initEventListeners();
+            }
+
+            initEventListeners() {
+                // Click to browse
+                this.uploadArea.addEventListener('click', () => {
+                    this.imageInput.click();
+                });
+
+                // File input change
+                this.imageInput.addEventListener('change', (e) => {
+                    if (e.target.files.length > 0) {
+                        this.handleFileUpload(e.target.files[0]);
+                    }
+                });
+
+                // Drag and drop
+                this.uploadArea.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    this.uploadArea.classList.add('dragover');
+                });
+
+                this.uploadArea.addEventListener('dragleave', (e) => {
+                    e.preventDefault();
+                    this.uploadArea.classList.remove('dragover');
+                });
+
+                this.uploadArea.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    this.uploadArea.classList.remove('dragover');
+                    
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                        this.handleFileUpload(files[0]);
+                    }
+                });
+
+                // Remove image
+                this.removeBtn.addEventListener('click', () => {
+                    this.removeImage();
+                });
+            }
+
+            async handleFileUpload(file) {
+                if (!this.validateFile(file)) {
+                    return;
+                }
+
+                this.uploadModal.show();
+
+                const formData = new FormData();
+                formData.append('file', file);
+
+                try {
+                    const response = await fetch('/api/upload/image', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const result = await response.json();
+                    this.uploadModal.hide();
+
+                    if (result.success) {
+                        this.showPreview(result.url);
+                        this.imageUrlInput.value = result.url;
+                        this.showAlert('Image uploaded successfully!', 'success');
+                    } else {
+                        this.showAlert(result.message, 'danger');
+                    }
+                } catch (error) {
+                    this.uploadModal.hide();
+                    this.showAlert('Upload failed: ' + error.message, 'danger');
+                }
+            }
+
+            validateFile(file) {
+                const maxSize = 5 * 1024 * 1024; // 5MB
+                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+
+                if (!allowedTypes.includes(file.type)) {
+                    this.showAlert('Please select a valid image file (JPG, PNG, WebP)', 'danger');
+                    return false;
+                }
+
+                if (file.size > maxSize) {
+                    this.showAlert('File size must be less than 5MB', 'danger');
+                    return false;
+                }
+
+                return true;
+            }
+
+            showPreview(url) {
+                this.previewImg.src = url;
+                this.uploadArea.style.display = 'none';
+                this.previewContainer.style.display = 'block';
+            }
+
+            removeImage() {
+                this.previewContainer.style.display = 'none';
+                this.uploadArea.style.display = 'block';
+                this.imageUrlInput.value = '';
+                this.imageInput.value = '';
+                this.previewImg.src = '';
+            }
+
+            showAlert(message, type) {
+                const alert = document.createElement('div');
+                alert.className = `alert alert-${type} alert-dismissible fade show modern-alert`;
+                alert.innerHTML = `
+                    <i class="fas fa-${type === 'success' ? 'check' : 'exclamation'}-circle me-2"></i>
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+                
+                const container = document.querySelector('.container');
+                container.insertBefore(alert, container.firstChild);
+                
+                setTimeout(() => {
+                    alert.remove();
+                }, 5000);
+            }
+        }
+
+        function viewBook(id) {
+            window.open('/books/' + id, '_blank');
+        }
+
+        // Initialize uploader when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            new ImageUploader();
+        });
+    </script>
+</div>
+</html> 

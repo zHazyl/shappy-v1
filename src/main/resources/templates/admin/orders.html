@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{fragments/layout :: layout(title='Manage Orders', content=~{::content})}">
+<div th:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-shopping-cart"></i> Manage Orders</h2>
+        <a th:href="@{/admin}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+
+    <!-- Orders List -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-list"></i> All Orders</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Date</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="order : ${orders.content}">
+                            <td th:text="${order.id}">#123</td>
+                            <td th:text="${order.user.username}">Customer</td>
+                            <td th:text="${#temporals.format(order.createdAt, 'MMM dd, yyyy')}">Date</td>
+                            <td th:text="|$${order.totalAmount}|">$0.00</td>
+                            <td>
+                                <span class="badge" 
+                                      th:classappend="${order.status == T(com.bookstore.enums.OrderStatus).PENDING} ? 'bg-warning' : 
+                                                     ${order.status == T(com.bookstore.enums.OrderStatus).SHIPPED} ? 'bg-info' : 'bg-success'"
+                                      th:text="${order.status}">PENDING</span>
+                            </td>
+                            <td>
+                                <form th:action="@{/admin/orders/{id}/status(id=${order.id})}" method="post" class="d-inline">
+                                    <select name="status" class="form-select form-select-sm d-inline-block" style="width: auto;">
+                                        <option th:each="status : ${orderStatuses}" 
+                                                th:value="${status}" 
+                                                th:text="${status}"
+                                                th:selected="${status == order.status}">PENDING</option>
+                                    </select>
+                                    <button type="submit" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-save"></i> Update
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <nav th:if="${orders.totalPages > 1}">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item" th:classappend="${!orders.hasPrevious()} ? 'disabled'">
+                        <a class="page-link" th:href="@{/admin/orders(page=${orders.number - 1})}">Previous</a>
+                    </li>
+                    <li class="page-item" th:each="pageNum : ${#numbers.sequence(0, orders.totalPages - 1)}" 
+                        th:classappend="${pageNum == orders.number} ? 'active'">
+                        <a class="page-link" th:href="@{/admin/orders(page=${pageNum})}" th:text="${pageNum + 1}">1</a>
+                    </li>
+                    <li class="page-item" th:classappend="${!orders.hasNext()} ? 'disabled'">
+                        <a class="page-link" th:href="@{/admin/orders(page=${orders.number + 1})}">Next</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+</html> 

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{fragments/layout :: layout(title='Order History', content=~{::content})}">
+<div th:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-history"></i> Order History</h2>
+        <a th:href="@{/home}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Home
+        </a>
+    </div>
+
+    <div th:if="${orders.hasContent()}">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-list"></i> Your Orders</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Order ID</th>
+                                        <th>Date</th>
+                                        <th>Total</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="order : ${orders.content}">
+                                        <td th:text="|#${order.id}|">#123</td>
+                                        <td th:text="${#temporals.format(order.createdAt, 'MMM dd, yyyy')}">Date</td>
+                                        <td th:text="|$${order.totalAmount}|">$0.00</td>
+                                        <td>
+                                            <span class="badge" 
+                                                  th:classappend="${order.status == T(com.bookstore.enums.OrderStatus).PENDING} ? 'bg-warning' : 
+                                                                 ${order.status == T(com.bookstore.enums.OrderStatus).SHIPPED} ? 'bg-info' : 'bg-success'"
+                                                  th:text="${order.status}">PENDING</span>
+                                        </td>
+                                        <td>
+                                            <a th:href="@{/orders/{id}(id=${order.id})}" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye"></i> View Details
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination -->
+                        <nav th:if="${orders.totalPages > 1}">
+                            <ul class="pagination justify-content-center">
+                                <li class="page-item" th:classappend="${!orders.hasPrevious()} ? 'disabled'">
+                                    <a class="page-link" th:href="@{/orders(page=${orders.number - 1})}">Previous</a>
+                                </li>
+                                <li class="page-item" th:each="pageNum : ${#numbers.sequence(0, orders.totalPages - 1)}" 
+                                    th:classappend="${pageNum == orders.number} ? 'active'">
+                                    <a class="page-link" th:href="@{/orders(page=${pageNum})}" th:text="${pageNum + 1}">1</a>
+                                </li>
+                                <li class="page-item" th:classappend="${!orders.hasNext()} ? 'disabled'">
+                                    <a class="page-link" th:href="@{/orders(page=${orders.number + 1})}">Next</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Empty State -->
+    <div th:unless="${orders.hasContent()}" class="text-center py-5">
+        <i class="fas fa-shopping-bag fa-4x text-muted mb-4"></i>
+        <h3 class="text-muted">No orders yet</h3>
+        <p class="text-muted mb-4">Start shopping to see your order history here!</p>
+        <a th:href="@{/home}" class="btn btn-primary btn-lg">
+            <i class="fas fa-book"></i> Browse Books
+        </a>
+    </div>
+</div>
+</html> 

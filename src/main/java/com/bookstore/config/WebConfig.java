@@ -1,27 +1,20 @@
 package com.bookstore.config;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
-    @Value("${app.images.path}")
-    private String imagesPath;
+    // Spring Boot automatically serves static content from:
+    // - src/main/resources/static/
+    // - src/main/resources/public/
+    // - src/main/resources/resources/
+    // - src/main/resources/META-INF/resources/
+    //
+    // Images in src/main/resources/static/images/ are accessible at:
+    // http://localhost:8080/images/
+    //
+    // No custom ResourceHandler configuration needed!
 
-    @Override
-    public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // Serve images from the configured directory
-        registry.addResourceHandler("/images/**")
-                .addResourceLocations("file:" + imagesPath + "/");
-                
-        // Serve static web resources
-        registry.addResourceHandler("/css/**")
-                .addResourceLocations("classpath:/static/css/");
-                
-        registry.addResourceHandler("/js/**")
-                .addResourceLocations("classpath:/static/js/");
-    }
 } 

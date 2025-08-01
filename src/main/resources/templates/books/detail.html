@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{fragments/layout :: layout(title=${book.title}, content=~{::content})}">
+<div th:fragment="content">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                                   <img th:src="${book.imageUrl}" th:alt="${book.title}" class="card-img-top" style="height: 400px; object-fit: cover;">
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <form th:action="@{/cart/add}" method="post" sec:authorize="isAuthenticated()">
+                            <input type="hidden" name="bookId" th:value="${book.id}">
+                            <div class="input-group mb-2">
+                                <input type="number" name="quantity" value="1" min="1" max="10" class="form-control">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-cart-plus"></i> Add to Cart
+                                </button>
+                            </div>
+                        </form>
+                        <small sec:authorize="!isAuthenticated()" class="text-muted text-center">
+                            <a th:href="@{/login}">Login</a> to add to cart
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <div class="mb-4">
+                <h1 th:text="${book.title}">Book Title</h1>
+                <h5 class="text-muted mb-3" th:text="|by ${book.author}|">Author</h5>
+                
+                <div class="mb-3">
+                    <span class="badge bg-secondary me-2" th:text="${book.genre}">Genre</span>
+                    <span class="h4 text-success" th:text="|$${book.price}|">Price</span>
+                </div>
+                
+                <div class="mb-3" th:if="${reviewCount > 0}">
+                    <div class="rating-stars">
+                        <span th:each="i : ${#numbers.sequence(1, 5)}" 
+                              th:class="${i <= averageRating} ? 'fas fa-star' : 'far fa-star'"></span>
+                        <span class="ms-2" th:text="|${#numbers.formatDecimal(averageRating, 1, 1)} (${reviewCount} reviews)|">Rating</span>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <h6>Description</h6>
+                    <p th:text="${book.description}">Book description goes here...</p>
+                </div>
+            </div>
+            
+            <!-- Reviews Section -->
+            <div class="mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5>Customer Reviews</h5>
+                    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#reviewModal"
+                            sec:authorize="isAuthenticated()" th:unless="${hasUserReviewed}">
+                        <i class="fas fa-plus"></i> Add Review
+                    </button>
+                </div>
+                
+                <div th:if="${reviews.hasContent()}">
+                    <div th:each="review : ${reviews.content}" class="card mb-3 review-card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <strong th:text="${review.user.username}">Username</strong>
+                                    <div class="review-rating">
+                                        <span th:each="i : ${#numbers.sequence(1, 5)}" 
+                                              th:class="${i <= review.rating} ? 'fas fa-star' : 'far fa-star'"></span>
+                                    </div>
+                                </div>
+                                <small class="text-muted" th:text="${#temporals.format(review.createdAt, 'MMM dd, yyyy')}">Date</small>
+                            </div>
+                            <p th:text="${review.comment}" th:if="${review.comment}">Review comment</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Pagination for reviews -->
+                    <nav th:if="${reviews.totalPages > 1}">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item" th:classappend="${!reviews.hasPrevious()} ? 'disabled'">
+                                <a class="page-link" th:href="@{/books/{id}(id=${book.id}, page=${reviews.number - 1})}">Previous</a>
+                            </li>
+                            <li class="page-item" th:each="pageNum : ${#numbers.sequence(0, reviews.totalPages - 1)}" 
+                                th:classappend="${pageNum == reviews.number} ? 'active'">
+                                <a class="page-link" th:href="@{/books/{id}(id=${book.id}, page=${pageNum})}" th:text="${pageNum + 1}">1</a>
+                            </li>
+                            <li class="page-item" th:classappend="${!reviews.hasNext()} ? 'disabled'">
+                                <a class="page-link" th:href="@{/books/{id}(id=${book.id}, page=${reviews.number + 1})}">Next</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+                
+                <div th:unless="${reviews.hasContent()}" class="text-center py-4 text-muted">
+                    <i class="fas fa-comments fa-2x mb-3"></i>
+                    <p>No reviews yet. Be the first to review this book!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add Review Modal -->
+    <div class="modal fade" id="reviewModal" tabindex="-1" sec:authorize="isAuthenticated()">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Review</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form th:action="@{/books/{id}/review(id=${book.id})}" method="post">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="rating" class="form-label">Rating</label>
+                            <select id="rating" name="rating" class="form-select" required>
+                                <option value="">Select rating</option>
+                                <option value="1">1 Star</option>
+                                <option value="2">2 Stars</option>
+                                <option value="3">3 Stars</option>
+                                <option value="4">4 Stars</option>
+                                <option value="5">5 Stars</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="comment" class="form-label">Comment</label>
+                            <textarea id="comment" name="comment" class="form-control" rows="4" 
+                                      placeholder="Share your thoughts about this book..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Submit Review</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</html> 
