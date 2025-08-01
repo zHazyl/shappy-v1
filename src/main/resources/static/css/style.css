@@ -1,0 +1,194 @@
+/* Custom Bookstore Styles */
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
+.card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.book-card-img {
+    height: 250px;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.book-card-img:hover {
+    transform: scale(1.05);
+}
+
+.price-tag {
+    font-weight: bold;
+    color: #28a745;
+}
+
+.rating-stars {
+    color: #ffc107;
+}
+
+.search-panel {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.search-panel .form-label {
+    color: white;
+    font-weight: 500;
+}
+
+.search-panel .form-control,
+.search-panel .form-select {
+    border: none;
+    border-radius: 8px;
+}
+
+.btn-search {
+    background: linear-gradient(45deg, #28a745, #20c997);
+    border: none;
+    font-weight: 500;
+}
+
+.btn-search:hover {
+    background: linear-gradient(45deg, #20c997, #28a745);
+    transform: translateY(-1px);
+}
+
+.footer {
+    background-color: #343a40 !important;
+}
+
+.alert {
+    border-radius: 8px;
+    border: none;
+}
+
+.pagination .page-link {
+    border-radius: 6px;
+    margin: 0 2px;
+    border: 1px solid #dee2e6;
+}
+
+.pagination .page-item.active .page-link {
+    background: linear-gradient(45deg, #007bff, #0056b3);
+    border-color: #007bff;
+}
+
+.cart-total {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #28a745;
+}
+
+.order-status {
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 0.875rem;
+}
+
+.order-status.pending {
+    color: #ffc107;
+}
+
+.order-status.shipped {
+    color: #17a2b8;
+}
+
+.order-status.delivered {
+    color: #28a745;
+}
+
+.book-description {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.admin-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.admin-card .card-body {
+    padding: 2rem;
+}
+
+.admin-stat {
+    font-size: 2.5rem;
+    font-weight: bold;
+}
+
+.review-card {
+    border-left: 4px solid #007bff;
+}
+
+.review-rating {
+    color: #ffc107;
+    font-size: 1.2rem;
+}
+
+.empty-state {
+    opacity: 0.7;
+}
+
+.loading-spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #007bff;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .navbar-brand {
+        font-size: 1.2rem;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .search-panel {
+        margin-bottom: 1rem;
+    }
+    
+    .book-grid {
+        margin-top: 1rem;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: #121212;
+        color: #ffffff;
+    }
+    
+    .card {
+        background-color: #1e1e1e;
+        border-color: #333;
+    }
+    
+    .card-body {
+        color: #ffffff;
+    }
+} 

@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:13
+    container_name: bookstore-postgres
+    environment:
+      POSTGRES_DB: bookstore
+      POSTGRES_USER: bookstore_user
+      POSTGRES_PASSWORD: bookstore_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - bookstore-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bookstore_user -d bookstore"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  app:
+    build: .
+    container_name: bookstore-app
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/bookstore
+      - SPRING_DATASOURCE_USERNAME=bookstore_user
+      - SPRING_DATASOURCE_PASSWORD=bookstore_pass
+      - IMAGES_PATH=/app/images
+      - PORT=8080
+    ports:
+      - "8080:8080"
+    volumes:
+      - app_images:/app/images
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - bookstore-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+  app_images:
+    driver: local
+
+networks:
+  bookstore-network:
+    driver: bridge 
