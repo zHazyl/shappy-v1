@@ -20,9 +20,25 @@ import java.util.UUID;
 @RequestMapping("/api/upload")
 public class ImageUploadController {
 
-    private static final String UPLOAD_DIR = "src/main/resources/static/images/books/";
+    @Value("${app.upload.dir:uploads/images/books}")
+    private String uploadDir;
+
     private static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
     private static final String[] ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"};
+
+    private void ensureUploadDirectoryExists() {
+        try {
+            File uploadDirectory = new File(uploadDir);
+            if (!uploadDirectory.exists()) {
+                boolean created = uploadDirectory.mkdirs();
+                if (created) {
+                    System.out.println("Created upload directory: " + uploadDirectory.getAbsolutePath());
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to create upload directory: " + e.getMessage());
+        }
+    }
 
     @PostMapping("/image")
     @ResponseBody
@@ -30,6 +46,9 @@ public class ImageUploadController {
         Map<String, Object> response = new HashMap<>();
         
         try {
+            // Ensure upload directory exists
+            ensureUploadDirectoryExists();
+
             // Validate file
             if (file.isEmpty()) {
                 response.put("success", false);
@@ -56,21 +75,15 @@ public class ImageUploadController {
             String fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
             String uniqueFilename = generateUniqueFilename() + fileExtension;
 
-            // Create upload directory if it doesn't exist
-            File uploadDir = new File(UPLOAD_DIR);
-            if (!uploadDir.exists()) {
-                uploadDir.mkdirs();
-            }
-
             // Save file
-            Path targetPath = Paths.get(UPLOAD_DIR + uniqueFilename);
+            Path targetPath = Paths.get(uploadDir, uniqueFilename);
             Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
 
-            // Return success response
+            // Return success response with the URL that will be served by WebConfig
             response.put("success", true);
             response.put("message", "Image uploaded successfully");
             response.put("filename", uniqueFilename);
-            response.put("url", "/images/books/" + uniqueFilename);
+            response.put("url", "/uploads/images/books/" + uniqueFilename);
             response.put("size", file.getSize());
 
             return ResponseEntity.ok(response);
@@ -96,7 +109,7 @@ public class ImageUploadController {
             }
 
             // Delete file
-            Path filePath = Paths.get(UPLOAD_DIR + filename);
+            Path filePath = Paths.get(uploadDir, filename);
             if (Files.exists(filePath)) {
                 Files.delete(filePath);
                 response.put("success", true);
@@ -121,12 +134,10 @@ public class ImageUploadController {
         Map<String, Object> response = new HashMap<>();
         
         try {
-            File uploadDir = new File(UPLOAD_DIR);
-            if (!uploadDir.exists()) {
-                uploadDir.mkdirs();
-            }
-
-            File[] files = uploadDir.listFiles((dir, name) -> isValidImageFile(name));
+            ensureUploadDirectoryExists();
+            
+            File uploadDirectory = new File(uploadDir);
+            File[] files = uploadDirectory.listFiles((dir, name) -> isValidImageFile(name));
             
             if (files != null) {
                 Map<String, Map<String, Object>> imageInfo = new HashMap<>();
@@ -134,7 +145,7 @@ public class ImageUploadController {
                 for (File file : files) {
                     Map<String, Object> info = new HashMap<>();
                     info.put("size", file.length());
-                    info.put("url", "/images/books/" + file.getName());
+                    info.put("url", "/uploads/images/books/" + file.getName());
                     info.put("lastModified", file.lastModified());
                     imageInfo.put(file.getName(), info);
                 }
