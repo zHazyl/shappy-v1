@@ -26,10 +26,11 @@ public class SecurityConfig {
         http
             .authorizeHttpRequests(authz -> authz
                 .requestMatchers("/", "/login", "/register", "/css/**", "/js/**", "/images/**", "/uploads/**", "/webjars/**").permitAll()
+                .requestMatchers("/home", "/books/**").permitAll()  // Allow anonymous browsing
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/upload/**").hasRole("ADMIN")
                 .requestMatchers("/api/chat/**").hasAnyRole("USER", "ADMIN")
-                .requestMatchers("/home", "/books/**", "/cart/**", "/checkout/**", "/orders/**").hasAnyRole("USER", "ADMIN")
+                .requestMatchers("/cart/**", "/checkout/**", "/orders/**").hasAnyRole("USER", "ADMIN")  // Require auth for shopping
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
@@ -40,7 +41,7 @@ public class SecurityConfig {
             )
             .logout(logout -> logout
                 .logoutUrl("/logout")
-                .logoutSuccessUrl("/login?logout=true")
+                .logoutSuccessUrl("/?logout=true")  // Redirect to home page after logout
                 .invalidateHttpSession(true)
                 .deleteCookies("JSESSIONID")
                 .permitAll()
