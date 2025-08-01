@@ -20,15 +20,14 @@ public class MainController {
     private UserService userService;
 
     @GetMapping("/")
-    public String index(Authentication authentication) {
-        // If user is authenticated, redirect to appropriate page
-        if (authentication != null && authentication.isAuthenticated() && 
-            !authentication.getName().equals("anonymousUser")) {
-            return "redirect:/home";
+    public String index(@RequestParam(value = "logout", required = false) String logout,
+                       RedirectAttributes redirectAttributes,
+                       Authentication authentication) {
+        if (logout != null) {
+            redirectAttributes.addFlashAttribute("success", "You have been successfully logged out. Thank you for using BookHaven!");
         }
-        
-        // If not authenticated, go to login
-        return "redirect:/login";
+        // Always redirect to home page (both authenticated and anonymous users can browse)
+        return "redirect:/home";
     }
 
     @GetMapping("/login")

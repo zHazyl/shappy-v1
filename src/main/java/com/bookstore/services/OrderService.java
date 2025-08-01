@@ -93,7 +93,6 @@ public class OrderService {
     }
 
     public BigDecimal getTotalRevenue() {
-        BigDecimal revenue = orderRepository.getTotalRevenue();
-        return revenue != null ? revenue : BigDecimal.ZERO;
+        return orderRepository.getTotalRevenueByStatus(OrderStatus.DELIVERED);
     }
 } 

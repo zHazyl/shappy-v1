@@ -72,8 +72,7 @@
                     <p><strong>Order Date:</strong> <span th:text="${#temporals.format(order.createdAt, 'MMM dd, yyyy HH:mm')}">Date</span></p>
                     <p><strong>Status:</strong> 
                         <span class="badge" 
-                              th:classappend="${order.status == T(com.bookstore.enums.OrderStatus).PENDING} ? 'bg-warning' : 
-                                             ${order.status == T(com.bookstore.enums.OrderStatus).SHIPPED} ? 'bg-info' : 'bg-success'"
+                              th:classappend="${order.status.name() == 'PENDING'} ? 'bg-warning' : (${order.status.name() == 'SHIPPED'} ? 'bg-info' : 'bg-success')"
                               th:text="${order.status}">PENDING</span>
                     </p>
                 </div>

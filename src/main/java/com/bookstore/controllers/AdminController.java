@@ -81,6 +81,42 @@ public class AdminController {
         return "redirect:/admin/books";
     }
 
+    @GetMapping("/books/{id}/edit")
+    public String editBookForm(@PathVariable Long id, Model model, RedirectAttributes redirectAttributes) {
+        try {
+            Book book = bookService.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Book not found"));
+            model.addAttribute("editBook", book);
+            return "admin/edit-book";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Error loading book: " + e.getMessage());
+            return "redirect:/admin/books";
+        }
+    }
+
+    @PostMapping("/books/{id}/update")
+    public String updateBook(@PathVariable Long id,
+                            @Valid @ModelAttribute("editBook") Book book,
+                            BindingResult result,
+                            Model model,
+                            RedirectAttributes redirectAttributes) {
+        if (result.hasErrors()) {
+            model.addAttribute("editBook", book);
+            return "admin/edit-book";
+        }
+
+        try {
+            // Ensure the ID is set correctly
+            book.setId(id);
+            bookService.saveBook(book);
+            redirectAttributes.addFlashAttribute("success", "Book updated successfully!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Error updating book: " + e.getMessage());
+        }
+
+        return "redirect:/admin/books";
+    }
+
     @PostMapping("/books/{id}/delete")
     public String deleteBook(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {

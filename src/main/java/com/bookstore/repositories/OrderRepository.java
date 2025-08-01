@@ -25,6 +25,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query("SELECT COUNT(o) FROM Order o")
     long countTotalOrders();
     
-    @Query("SELECT SUM(o.totalAmount) FROM Order o WHERE o.status = 'DELIVERED'")
-    java.math.BigDecimal getTotalRevenue();
+    @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE o.status = :status")
+    java.math.BigDecimal getTotalRevenueByStatus(@org.springframework.data.repository.query.Param("status") OrderStatus status);
 } 
