@@ -1,149 +1,264 @@
-// Main JavaScript file for Bookstore application
+// Main JavaScript file for BookHaven
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Auto-hide alerts after 5 seconds
-    const alerts = document.querySelectorAll('.alert');
-    alerts.forEach(alert => {
-        setTimeout(() => {
-            if (alert.classList.contains('show')) {
-                alert.classList.remove('show');
-                setTimeout(() => alert.remove(), 150);
-            }
-        }, 5000);
-    });
+// Get CSRF token for AJAX requests
+function getCSRFToken() {
+    const tokenElement = document.querySelector('meta[name="_csrf"]');
+    return tokenElement ? tokenElement.getAttribute('content') : null;
+}
 
-    // Confirm deletion actions
-    const deleteButtons = document.querySelectorAll('[data-confirm]');
-    deleteButtons.forEach(button => {
-        button.addEventListener('click', function(e) {
-            const message = this.getAttribute('data-confirm');
-            if (!confirm(message)) {
-                e.preventDefault();
-            }
-        });
-    });
+function getCSRFHeader() {
+    const headerElement = document.querySelector('meta[name="_csrf_header"]');
+    return headerElement ? headerElement.getAttribute('content') : 'X-CSRF-TOKEN';
+}
 
-    // Cart quantity validation
-    const quantityInputs = document.querySelectorAll('input[name="quantity"]');
-    quantityInputs.forEach(input => {
-        input.addEventListener('change', function() {
-            const value = parseInt(this.value);
-            if (isNaN(value) || value < 1) {
-                this.value = 1;
-            } else if (value > 99) {
-                this.value = 99;
-            }
-        });
-    });
+// Chat Support System
+class ChatSupport {
+    constructor() {
+        this.chatWidget = document.getElementById('chatWidget');
+        this.chatToggle = document.getElementById('chatToggle');
+        this.chatClose = document.getElementById('chatClose');
+        this.chatMessages = document.getElementById('chatMessages');
+        this.chatInput = document.getElementById('chatInput');
+        this.sendButton = document.getElementById('sendMessage');
+        
+        this.isOpen = false;
+        this.initEventListeners();
+        
+        // Add welcome message
+        this.addMessage('bot', 'Hello! I\'m here to help you find the perfect book. You can ask me about genres, authors, or specific titles!');
+    }
 
-    // Rating star interaction
-    const ratingStars = document.querySelectorAll('.rating-input .star');
-    ratingStars.forEach((star, index) => {
-        star.addEventListener('click', function() {
-            const rating = index + 1;
-            const ratingInput = document.getElementById('rating');
-            if (ratingInput) {
-                ratingInput.value = rating;
-            }
-            
-            // Update visual state
-            ratingStars.forEach((s, i) => {
-                s.classList.toggle('active', i <= index);
-            });
-        });
-
-        star.addEventListener('mouseenter', function() {
-            ratingStars.forEach((s, i) => {
-                s.classList.toggle('hover', i <= index);
-            });
-        });
-    });
-
-    // Price range validation
-    const priceInputs = document.querySelectorAll('input[type="number"][step="0.01"]');
-    priceInputs.forEach(input => {
-        input.addEventListener('change', function() {
-            const value = parseFloat(this.value);
-            if (isNaN(value) || value < 0) {
-                this.value = '';
-            }
-        });
-    });
-
-    // Search form enhancements
-    const searchForm = document.querySelector('form[action*="home"]');
-    if (searchForm) {
-        const clearButton = searchForm.querySelector('.btn-outline-secondary');
-        if (clearButton) {
-            clearButton.addEventListener('click', function(e) {
-                e.preventDefault();
-                searchForm.querySelectorAll('input, select').forEach(field => {
-                    field.value = '';
-                });
-                searchForm.submit();
+    initEventListeners() {
+        if (this.chatToggle) {
+            this.chatToggle.addEventListener('click', () => this.toggleChat());
+        }
+        
+        if (this.chatClose) {
+            this.chatClose.addEventListener('click', () => this.closeChat());
+        }
+        
+        if (this.sendButton) {
+            this.sendButton.addEventListener('click', () => this.sendMessage());
+        }
+        
+        if (this.chatInput) {
+            this.chatInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    this.sendMessage();
+                }
             });
         }
     }
 
-    // Loading states for forms
-    const forms = document.querySelectorAll('form');
-    forms.forEach(form => {
-        form.addEventListener('submit', function() {
-            const submitBtn = form.querySelector('button[type="submit"]');
-            if (submitBtn && !submitBtn.disabled) {
-                const originalText = submitBtn.innerHTML;
-                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Loading...';
-                submitBtn.disabled = true;
-                
-                // Re-enable after 5 seconds as fallback
-                setTimeout(() => {
-                    submitBtn.innerHTML = originalText;
-                    submitBtn.disabled = false;
-                }, 5000);
-            }
-        });
-    });
-
-    // Tooltip initialization for Bootstrap
-    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
-    });
-
-    // Image lazy loading
-    const images = document.querySelectorAll('img[data-src]');
-    if ('IntersectionObserver' in window) {
-        const imageObserver = new IntersectionObserver((entries, observer) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const img = entry.target;
-                    img.src = img.dataset.src;
-                    img.classList.remove('lazy');
-                    imageObserver.unobserve(img);
-                }
-            });
-        });
-
-        images.forEach(img => imageObserver.observe(img));
-    } else {
-        // Fallback for browsers without IntersectionObserver
-        images.forEach(img => {
-            img.src = img.dataset.src;
-            img.classList.remove('lazy');
-        });
+    toggleChat() {
+        if (this.isOpen) {
+            this.closeChat();
+        } else {
+            this.openChat();
+        }
     }
-});
 
-// Utility functions
-function formatPrice(price) {
-    return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD'
-    }).format(price);
+    openChat() {
+        if (this.chatWidget) {
+            this.chatWidget.style.display = 'flex';
+            this.isOpen = true;
+            if (this.chatInput) {
+                this.chatInput.focus();
+            }
+        }
+    }
+
+    closeChat() {
+        if (this.chatWidget) {
+            this.chatWidget.style.display = 'none';
+            this.isOpen = false;
+        }
+    }
+
+    async sendMessage() {
+        const message = this.chatInput?.value?.trim();
+        if (!message) return;
+
+        // Add user message
+        this.addMessage('user', message);
+        this.chatInput.value = '';
+
+        // Add typing indicator
+        const typingId = this.addTypingIndicator();
+
+        try {
+            const response = await fetch('/api/chat/message', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    [getCSRFHeader()]: getCSRFToken()
+                },
+                body: JSON.stringify({ message: message })
+            });
+
+            const data = await response.json();
+            
+            // Remove typing indicator
+            this.removeTypingIndicator(typingId);
+            
+            if (data.success) {
+                this.addMessage('bot', data.response);
+                
+                // Show recommended books if any
+                if (data.books && data.books.length > 0) {
+                    this.addBookRecommendations(data.books);
+                }
+            } else {
+                this.addMessage('bot', 'I\'m sorry, I encountered an error. Please try asking in a different way.');
+            }
+        } catch (error) {
+            console.error('Chat error:', error);
+            this.removeTypingIndicator(typingId);
+            this.addMessage('bot', 'I\'m sorry, I\'m having trouble connecting right now. Please try again later.');
+        }
+    }
+
+    addMessage(sender, text) {
+        if (!this.chatMessages) return;
+
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `chat-message ${sender}-message`;
+        
+        messageDiv.innerHTML = `
+            <div class="message-content">
+                <p class="mb-1">${this.escapeHtml(text)}</p>
+                <small class="text-muted">${this.getCurrentTime()}</small>
+            </div>
+        `;
+        
+        this.chatMessages.appendChild(messageDiv);
+        this.scrollToBottom();
+    }
+
+    addBookRecommendations(books) {
+        if (!this.chatMessages || !books.length) return;
+
+        const recommendationsDiv = document.createElement('div');
+        recommendationsDiv.className = 'chat-message bot-message book-recommendations';
+        
+        let booksHtml = '<div class="message-content"><p class="mb-2">Here are some books you might like:</p>';
+        
+        books.forEach(book => {
+            booksHtml += `
+                <div class="recommended-book">
+                    <div class="d-flex">
+                        <img src="${this.escapeHtml(book.imageUrl)}" alt="${this.escapeHtml(book.title)}" class="book-thumbnail">
+                        <div class="book-info">
+                            <h6 class="mb-1">${this.escapeHtml(book.title)}</h6>
+                            <p class="mb-1 text-muted small">by ${this.escapeHtml(book.author)}</p>
+                            <p class="mb-1 text-muted small">${this.escapeHtml(book.genre)}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="fw-bold text-primary">$${book.price}</span>
+                                <a href="/books/${book.id}" class="btn btn-sm btn-outline-primary">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        booksHtml += `<small class="text-muted">${this.getCurrentTime()}</small></div>`;
+        recommendationsDiv.innerHTML = booksHtml;
+        
+        this.chatMessages.appendChild(recommendationsDiv);
+        this.scrollToBottom();
+    }
+
+    addTypingIndicator() {
+        const typingDiv = document.createElement('div');
+        const typingId = 'typing-' + Date.now();
+        typingDiv.id = typingId;
+        typingDiv.className = 'chat-message bot-message typing-indicator';
+        
+        typingDiv.innerHTML = `
+            <div class="message-content">
+                <div class="typing-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        `;
+        
+        this.chatMessages.appendChild(typingDiv);
+        this.scrollToBottom();
+        
+        return typingId;
+    }
+
+    removeTypingIndicator(typingId) {
+        const typingElement = document.getElementById(typingId);
+        if (typingElement) {
+            typingElement.remove();
+        }
+    }
+
+    scrollToBottom() {
+        if (this.chatMessages) {
+            this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+        }
+    }
+
+    getCurrentTime() {
+        return new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    }
+
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
 }
 
-function updateCartCount() {
-    // This would typically make an AJAX call to get the current cart count
-    // For now, we'll just refresh the page
-    window.location.reload();
-} 
+// Image Upload Preview
+function setupImageUpload() {
+    const imageInput = document.getElementById('imageFile');
+    const previewContainer = document.getElementById('imagePreview');
+    const previewImage = document.getElementById('previewImage');
+    const fileName = document.getElementById('fileName');
+
+    if (imageInput) {
+        imageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    if (previewImage) {
+                        previewImage.src = e.target.result;
+                    }
+                    if (previewContainer) {
+                        previewContainer.style.display = 'block';
+                    }
+                    if (fileName) {
+                        fileName.textContent = file.name;
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+}
+
+// Initialize everything when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('BookHaven JavaScript loaded');
+    
+    // Initialize chat support
+    if (document.getElementById('chatWidget')) {
+        new ChatSupport();
+    }
+    
+    // Setup image upload preview
+    setupImageUpload();
+    
+    // Add animation delays to cards
+    const cards = document.querySelectorAll('.fade-in-up');
+    cards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.1}s`;
+    });
+}); 

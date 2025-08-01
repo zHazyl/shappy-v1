@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
+
 @Repository
 public interface BookRepository extends JpaRepository<Book, Long> {
     
@@ -16,6 +18,10 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     Page<Book> findByAuthorContainingIgnoreCase(String author, Pageable pageable);
     
     Page<Book> findByGenreIgnoreCase(String genre, Pageable pageable);
+    
+    Page<Book> findByTitleContainingIgnoreCaseAndGenreIgnoreCase(String title, String genre, Pageable pageable);
+    
+    Page<Book> findByAuthorContainingIgnoreCaseAndGenreIgnoreCase(String author, String genre, Pageable pageable);
     
     @Query("SELECT b FROM Book b WHERE " +
            "(:title IS NULL OR LOWER(b.title) LIKE LOWER(CONCAT('%', :title, '%'))) AND " +
@@ -26,8 +32,8 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     Page<Book> findBooksWithFilters(@Param("title") String title,
                                    @Param("author") String author,
                                    @Param("genre") String genre,
-                                   @Param("minPrice") java.math.BigDecimal minPrice,
-                                   @Param("maxPrice") java.math.BigDecimal maxPrice,
+                                   @Param("minPrice") BigDecimal minPrice,
+                                   @Param("maxPrice") BigDecimal maxPrice,
                                    Pageable pageable);
     
     @Query("SELECT DISTINCT b.genre FROM Book b ORDER BY b.genre")

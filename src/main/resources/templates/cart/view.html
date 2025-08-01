@@ -15,13 +15,19 @@
                     <div class="card-body">
                         <div th:each="item : ${cartItems}" class="border-bottom pb-3 mb-3">
                             <div class="row align-items-center">
-                                <div class="col-md-2">
-                                                                           <img th:src="${item.book.imageUrl}" th:alt="${item.book.title}"  
-                                         class="img-fluid rounded" style="max-height: 80px;">
-                                </div>
-                                <div class="col-md-4">
-                                    <h6 th:text="${item.book.title}">Book Title</h6>
-                                    <small class="text-muted" th:text="|by ${item.book.author}|">Author</small>
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-center">
+                                        <a th:href="@{/books/{id}(id=${item.book.id})}" class="text-decoration-none me-3">
+                                            <img th:src="@{${item.book.imageUrl}}" th:alt="${item.book.title}" 
+                                                 class="img-thumbnail" style="width: 60px; height: 90px; object-fit: cover;">
+                                        </a>
+                                        <div>
+                                            <a th:href="@{/books/{id}(id=${item.book.id})}" class="text-decoration-none">
+                                                <h6 class="mb-1 text-dark" th:text="${item.book.title}">Book Title</h6>
+                                            </a>
+                                            <small class="text-muted" th:text="|by ${item.book.author}|">Author</small>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="col-md-2">
                                     <strong th:text="|$${item.book.price}|" class="text-primary">Price</strong>

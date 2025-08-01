@@ -27,9 +27,32 @@ public class BookService {
         return bookRepository.findAll(pageable);
     }
 
+    public List<Book> findAll() {
+        return bookRepository.findAll();
+    }
+
     public Page<Book> searchBooks(String title, String author, String genre, 
                                  BigDecimal minPrice, BigDecimal maxPrice, Pageable pageable) {
-        return bookRepository.findBooksWithFilters(title, author, genre, minPrice, maxPrice, pageable);
+        // Use simple search approach that's more reliable
+        if (title != null && !title.trim().isEmpty() && genre != null && !genre.trim().isEmpty()) {
+            // Search by title and filter by genre
+            return bookRepository.findByTitleContainingIgnoreCaseAndGenreIgnoreCase(title, genre, pageable);
+        } else if (author != null && !author.trim().isEmpty() && genre != null && !genre.trim().isEmpty()) {
+            // Search by author and filter by genre
+            return bookRepository.findByAuthorContainingIgnoreCaseAndGenreIgnoreCase(author, genre, pageable);
+        } else if (title != null && !title.trim().isEmpty()) {
+            // Search by title only
+            return bookRepository.findByTitleContainingIgnoreCase(title, pageable);
+        } else if (author != null && !author.trim().isEmpty()) {
+            // Search by author only
+            return bookRepository.findByAuthorContainingIgnoreCase(author, pageable);
+        } else if (genre != null && !genre.trim().isEmpty()) {
+            // Filter by genre only
+            return bookRepository.findByGenreIgnoreCase(genre, pageable);
+        } else {
+            // No filters, return all
+            return bookRepository.findAll(pageable);
+        }
     }
 
     public Optional<Book> findById(Long id) {

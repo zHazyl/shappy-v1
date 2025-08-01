@@ -1,5 +1,6 @@
 package com.bookstore.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -11,6 +12,9 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    @Autowired
+    private CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -24,12 +28,13 @@ public class SecurityConfig {
                 .requestMatchers("/", "/login", "/register", "/css/**", "/js/**", "/images/**", "/uploads/**", "/webjars/**").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/upload/**").hasRole("ADMIN")
+                .requestMatchers("/api/chat/**").hasAnyRole("USER", "ADMIN")
                 .requestMatchers("/home", "/books/**", "/cart/**", "/checkout/**", "/orders/**").hasAnyRole("USER", "ADMIN")
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
                 .loginPage("/login")
-                .defaultSuccessUrl("/home", true)
+                .successHandler(customAuthenticationSuccessHandler)
                 .failureUrl("/login?error=true")
                 .permitAll()
             )
@@ -46,7 +51,7 @@ public class SecurityConfig {
             .headers(headers -> headers
                 .frameOptions().deny()
             );
-
+        
         return http.build();
     }
 } 

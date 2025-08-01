@@ -49,10 +49,14 @@
                                 <tr th:each="item : ${orderItems}">
                                     <td>
                                         <div class="d-flex align-items-center">
-                                            <img th:src="${item.book.imageUrl}" th:alt="${item.book.title}" 
-                                                 class="img-thumbnail me-2" style="width: 40px; height: 60px; object-fit: cover;">
+                                            <a th:href="@{/books/{id}(id=${item.book.id})}" class="text-decoration-none me-2">
+                                                <img th:src="${item.book.imageUrl}" th:alt="${item.book.title}" 
+                                                     class="img-thumbnail" style="width: 40px; height: 60px; object-fit: cover;">
+                                            </a>
                                             <div>
-                                                <strong th:text="${item.book.title}">Book Title</strong>
+                                                <a th:href="@{/books/{id}(id=${item.book.id})}" class="text-decoration-none">
+                                                    <strong class="text-dark" th:text="${item.book.title}">Book Title</strong>
+                                                </a>
                                                 <br>
                                                 <small class="text-muted" th:text="|by ${item.book.author}|">Author</small>
                                             </div>

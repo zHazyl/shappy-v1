@@ -3,7 +3,6 @@ package com.bookstore.controllers;
 import com.bookstore.models.Book;
 import com.bookstore.services.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -22,30 +21,54 @@ public class HomeController {
     @Autowired
     private BookService bookService;
 
-    @Value("${app.pagination.default-size}")
-    private int defaultPageSize;
-
     @GetMapping("/home")
     public String home(@RequestParam(value = "page", defaultValue = "0") int page,
                       @RequestParam(value = "size", defaultValue = "12") int size,
-                      @RequestParam(value = "sort", defaultValue = "title") String sort,
-                      @RequestParam(value = "direction", defaultValue = "asc") String direction,
-                      @RequestParam(value = "title", required = false) String title,
-                      @RequestParam(value = "author", required = false) String author,
+                      @RequestParam(value = "search", required = false) String search,
                       @RequestParam(value = "genre", required = false) String genre,
-                      @RequestParam(value = "minPrice", required = false) BigDecimal minPrice,
-                      @RequestParam(value = "maxPrice", required = false) BigDecimal maxPrice,
+                      @RequestParam(value = "sort", defaultValue = "title") String sort,
                       Model model) {
 
-        Sort.Direction sortDirection = direction.equalsIgnoreCase("desc") ? 
-                                     Sort.Direction.DESC : Sort.Direction.ASC;
+        // Handle sort parameter and determine direction
+        Sort.Direction direction = Sort.Direction.ASC;
+        String sortField = "title";
         
-        Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sort));
+        switch (sort) {
+            case "title":
+                sortField = "title";
+                direction = Sort.Direction.ASC;
+                break;
+            case "author":
+                sortField = "author";
+                direction = Sort.Direction.ASC;
+                break;
+            case "price":
+                sortField = "price";
+                direction = Sort.Direction.ASC;
+                break;
+            case "priceDesc":
+                sortField = "price";
+                direction = Sort.Direction.DESC;
+                break;
+            default:
+                sortField = "title";
+                direction = Sort.Direction.ASC;
+        }
+        
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortField));
         
         Page<Book> books;
         
-        if (title != null || author != null || genre != null || minPrice != null || maxPrice != null) {
-            books = bookService.searchBooks(title, author, genre, minPrice, maxPrice, pageable);
+        // Use search parameter for both title and author search
+        if (search != null && !search.trim().isEmpty() || genre != null && !genre.trim().isEmpty()) {
+            books = bookService.searchBooks(
+                search != null ? search.trim() : null,  // title
+                search != null ? search.trim() : null,  // author (same search term)
+                genre != null && !genre.trim().isEmpty() ? genre : null,  // genre
+                null,  // minPrice
+                null,  // maxPrice
+                pageable
+            );
         } else {
             books = bookService.getAllBooks(pageable);
         }
@@ -54,15 +77,9 @@ public class HomeController {
 
         model.addAttribute("books", books);
         model.addAttribute("genres", genres);
-        model.addAttribute("currentPage", page);
-        model.addAttribute("pageSize", size);
-        model.addAttribute("sortField", sort);
-        model.addAttribute("sortDirection", direction);
-        model.addAttribute("title", title);
-        model.addAttribute("author", author);
+        model.addAttribute("search", search);
         model.addAttribute("genre", genre);
-        model.addAttribute("minPrice", minPrice);
-        model.addAttribute("maxPrice", maxPrice);
+        model.addAttribute("sort", sort);
 
         return "home";
     }

@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.validation.Valid;
+import org.springframework.security.core.Authentication;
 
 @Controller
 public class MainController {
@@ -19,8 +20,15 @@ public class MainController {
     private UserService userService;
 
     @GetMapping("/")
-    public String index() {
-        return "redirect:/home";
+    public String index(Authentication authentication) {
+        // If user is authenticated, redirect to appropriate page
+        if (authentication != null && authentication.isAuthenticated() && 
+            !authentication.getName().equals("anonymousUser")) {
+            return "redirect:/home";
+        }
+        
+        // If not authenticated, go to login
+        return "redirect:/login";
     }
 
     @GetMapping("/login")
@@ -31,7 +39,7 @@ public class MainController {
             model.addAttribute("error", "Invalid username or password");
         }
         if (logout != null) {
-            model.addAttribute("message", "You have been logged out successfully");
+            model.addAttribute("success", "You have been successfully logged out. Thank you for using BookHaven!");
         }
         return "auth/login";
     }
